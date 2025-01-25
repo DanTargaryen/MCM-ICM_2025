@@ -29,7 +29,7 @@ df_new['PreBronze'] = 0
 df_new['PreTotal'] = 0
 df_new['Participation'] = 0
 df_new['No_Medal'] = 0
-df_new['One_Medal'] = 0
+# df_new['One_Medal'] = 0
 df_new['More_than_two'] = 0
 df_new['Host'] = 0
 df_new['Gold'] = 0
@@ -54,15 +54,17 @@ for index, row in df_new.iterrows():
     Count_One = 0
     Count_MorethanTwo = 0
     for name,group in grouped_by_name:
-        if group[group['Medal'] != 'No medal'].shape[0]>=2:
+        if year not in group['Year'].values:
+            continue
+        if group[(group['Medal'] != 'No medal')&(group['Year']<year)].shape[0]>=1:
             Count_MorethanTwo += 1
-        elif group[group['Medal'] != 'No medal'].shape[0]==1:
-            Count_One += 1
-        else:
+        # elif group[(group['Medal'] != 'No medal')&(group['Year']<year)].shape[0]==1:
+        #     Count_One += 1
+        elif group[(group['Medal'] == 'No medal')&(group['Year']<year)].shape[0]>=1:
             Count_None += 1
 
     df_new.loc[index, 'No_Medal'] = Count_None
-    df_new.loc[index, 'One_Medal'] = Count_One
+    # df_new.loc[index, 'One_Medal'] = Count_One
     df_new.loc[index, 'More_than_two'] = Count_MorethanTwo
 
     df_new.loc[index,'Host'] = df_host[(df_host['Year']==year) & (df_host['Host']==row['Team'])].shape[0]
