@@ -4,19 +4,20 @@ import pandas as pd
 
 # 读取数据
 df = pd.read_csv('summerOly_athletes.csv')
+df_host = pd.read_csv('processed_host_data.csv')
 
 # 创建 NocSport 和 Year 列的唯一组合
 Noc_list = []
 for _, row in df.iterrows():
-    if [f"{row['NOC']}-{row['Sport']}", f"{row['Year']}"] not in Noc_list:
-        Noc_list.append([f"{row['NOC']}-{row['Sport']}", f"{row['Year']}"])
+    if [f"{row['NOC']}-{row['Sport']}", f"{row['Year']}",f"{row['Team']}"] not in Noc_list:
+        Noc_list.append([f"{row['NOC']}-{row['Sport']}", f"{row['Year']}",f"{row['Team']}"])
 
 # 创建一个新的 DataFrame df_new
-df_new = pd.DataFrame(Noc_list, columns=['NocSport', 'Year'])
+df_new = pd.DataFrame(Noc_list, columns=['NocSport', 'Year','Team'])
 
 # 添加 NocSport 列到原 DataFrame
 df['NocSport'] = df['NOC'] + '-' + df['Sport']
-df.drop(['Sport', 'Sex', 'NOC', 'Event', 'Team', 'City'], axis=1, inplace=True)
+df.drop(['Sport', 'Sex', 'NOC', 'Event', 'City'], axis=1, inplace=True)
 
 # 按 NocSport 列分组
 grouped = df.groupby('NocSport')
@@ -30,6 +31,8 @@ df_new['Participation'] = 0
 df_new['No_Medal'] = 0
 df_new['One_Medal'] = 0
 df_new['More_than_two'] = 0
+df_new['Host'] = 0
+df_new['Gold'] = 0
 
 for index, row in df_new.iterrows():
     year = int(row['Year'])
@@ -61,6 +64,10 @@ for index, row in df_new.iterrows():
     df_new.loc[index, 'No_Medal'] = Count_None
     df_new.loc[index, 'One_Medal'] = Count_One
     df_new.loc[index, 'More_than_two'] = Count_MorethanTwo
+
+    df_new.loc[index,'Host'] = df_host[(df_host['Year']==year) & (df_host['Host']==row['Team'])].shape[0]
+
+    df_new.loc[index,'Gold'] = grouped_row[(grouped_row['Year'] == year) & (grouped_row['Medal']=='Gold')].shape[0]
 
 
 df_new_sorted = df_new.sort_values(by='NocSport')
